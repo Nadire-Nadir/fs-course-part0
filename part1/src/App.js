@@ -6,15 +6,15 @@ const App = () => {
     const course = "Half Stack application development";
 
     const exercises = [
-        { part1: "Fundamentals of React", exercises1: 10 },
-        { part2: "Using props to pass data", exercises2: 7 },
-        { part3: "State of a component", exercises3: 14 }
+        { part: "Fundamentals of React", exercises: 10 },
+        { part: "Using props to pass data", exercises: 7 },
+        { part: "State of a component", exercises: 14 }
     ];
 
     const totalExercises =
-        exercises[0].exercises1 +
-        exercises[1].exercises2 +
-        exercises[2].exercises3
+        exercises[0].exercises +
+        exercises[1].exercises +
+        exercises[2].exercises
 
     
     return (
@@ -22,7 +22,7 @@ const App = () => {
             <Header course={course} />
             <Content exercises={exercises} />
             <Total total={totalExercises} />
-         </div>
+        </div>
     );
 };
 
