@@ -1,6 +1,5 @@
-const Total = (props) => {
-    const { parts } = props;
-    
+const Total = ({ parts }) => {
+
     return (
         <p>
             Number of exercises{" "}
