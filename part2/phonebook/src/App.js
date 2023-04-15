@@ -39,60 +39,54 @@ const App = () => {
         setPhoneNumber(event.target.value);
     };
 
-    const checkName = (name) => {
-        if (
-            persons.some((person) => person.name.toLowerCase() === name.toLowerCase())
-        ) {
-            return true;
+    const cleanForm = () => {
+        setNewName("");
+        setPhoneNumber("");
+    }
+
+    const updatePerson = (person) => {
+        const ok = window.confirm(
+            `${newName} is already added to phonebook, replace the old number with the new one?`)
+        
+        if (ok) {
+            personService
+                .updatePerson(person.id, {...person, number: phoneNumber})
+                .then((response) => {
+                    setPersons(
+                        persons.map((p) =>
+                            p.id !== person.id ? p : response
+                        )
+                    );
+                    setMessage(`Updated ${response.name}'s number`);
+
+                    setTimeout(() => {
+                        setMessage(null);
+                    }, 5000);
+                })
+                .catch((error) => {
+                    console.log("update error", error);
+                    if (error.response.status === 404) {
+                        setErrorMessage(
+                            `Information of ${newName} has already been removed from server.`
+                        );
+                        setTimeout(() => {
+                            setErrorMessage(null);
+                        }, 5000);
+                    }
+                });
+            cleanForm()
         }
-    };
+    }
 
     const addPerson = (event) => {
         event.preventDefault();
 
-        if (checkName(newName)) {
-            if (
-                window.confirm(
-                    `${newName} is already added to phonebook, replace the old number with the new one?`
-                )
-            ) {
-                const index = persons.findIndex.call(
-                    persons,
-                        (person) => person.name.toLowerCase() === newName.toLowerCase()
-                );
-                const targetedId = persons[index].id;
+        const person = persons.find(p => p.name.toLowerCase() === newName.toLowerCase())
 
-                const nameObject = {
-                    name: persons[index].name,
-                    number: phoneNumber,
-                };
-              
-                personService
-                    .updatePerson(targetedId, nameObject)
-                    .then((response) => {
-                        setPersons(
-                            persons.map((person) =>
-                                person.id !== targetedId ? person : response
-                            )
-                        );
-                        setMessage(`Updated ${response.name}'s number`);
-
-                        setTimeout(() => {
-                          setMessage(null);
-                        }, 5000);
-                    }).catch(error => {
-                        console.log("update error", error);
-                        if (error.response.status === 404) {
-                            setErrorMessage(`Information of ${newName} has already been removed from server.`);
-                            setTimeout(() => {
-                               setErrorMessage(null);
-                            }, 5000);
-                        }
-                    })
-            }
+        if (person) {   
+            updatePerson(person)   
         } else {
             const nameObject = {
-                id: persons.length + 1,
                 name: newName,
                 number: phoneNumber,
             };
@@ -111,18 +105,16 @@ const App = () => {
                     console.log("error", error);
                 });
         }
-        setNewName("");
-        setPhoneNumber("");
+         cleanForm();
     };
 
     const handleFilterChange = (event) => {
         setFilterInput(event.target.value);
     };
+    
+    const byFilterField = p => p.name.toLowerCase().includes(filterInput.toLowerCase())
 
-    const regex = new RegExp(filterInput.toLowerCase());
-    const filteredPersons = persons.filter(person => 
-        person.name.toLowerCase().match(regex)
-    );
+    const personsToShow = filterInput ? persons.filter(byFilterField) : persons
 
     const deletePerson = (id) => {
         if (window.confirm("Do you really want to delete this person?")) {
@@ -141,7 +133,7 @@ const App = () => {
         <div>
             <h2>Phone Book</h2>
 
-            <Notification message={message} errorMessage={ errorMessage } />
+            <Notification message={message} errorMessage={errorMessage} />
 
             <Filter value={filterInput} onChange={handleFilterChange} />
 
@@ -156,20 +148,10 @@ const App = () => {
             />
 
             <h3>Numbers</h3>
-
-            <div>
-                {filterInput ? (
-                    <Persons
-                        persons={filteredPersons}
-                        onClick={(id) => deletePerson(id)}
-                    />
-                ) : (
-                    <Persons
-                        persons={persons}
-                        onClick={(id) => deletePerson(id)}
-                    />
-                )}
-            </div>
+            <Persons
+                persons={personsToShow}
+                onClick={(id) => deletePerson(id)}
+            />
         </div>
     );
 };
