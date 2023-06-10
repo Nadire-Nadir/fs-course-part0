@@ -72,6 +72,11 @@ const App = () => {
                         setTimeout(() => {
                             setErrorMessage(null);
                         }, 5000);
+                    } else if (error.response.status === 400) {
+                        setErrorMessage(error.response.data.error);
+                        setTimeout(() => {
+                          setErrorMessage(null);
+                        }, 5000);
                     }
                 });
             cleanForm()
@@ -103,6 +108,10 @@ const App = () => {
                 })
                 .catch((error) => {
                     console.log("error", error);
+                    setErrorMessage(error.response.data.error);
+                    setTimeout(() => {
+                      setErrorMessage(null);
+                    }, 5000);
                 });
         }
          cleanForm();
